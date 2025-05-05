@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lung Cancer Prediction</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding-bottom: 70px;
+            position: relative;
+        }
+        
+        .main-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-section {
+            text-align: center;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            background-color: #e3f2fd; /* Light blue background */
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .header-section h1 {
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+        
+        .header-section p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+        
+        .header-icon {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            font-size: 8rem;
+            color: rgba(52, 152, 219, 0.1);
+            transform: rotate(15deg);
+            z-index: 0;
+        }
+        
+        .form-section {
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--secondary);
+            transition: all 0.3s ease;
+        }
+        
+        .form-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-section h2 {
+            color: var(--secondary);
+            font-size: 1.4rem;
+            margin-bottom: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-section h2:before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .radio-label {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            background-color: #f1f1f1;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-right: 0;
+            border: 2px solid transparent;
+        }
+        
+        .radio-label:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .radio-label input[type="radio"] {
+            display: none;
+        }
+        
+        .radio-label input[type="radio"]:checked + .radio-custom {
+            background-color: var(--secondary);
+        }
+        
+        .radio-custom {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 2px solid var(--secondary);
+            position: relative;
+        }
+        
+        .radio-label input[type="radio"]:checked + .radio-custom:before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: white;
+        }
+        
+        .radio-label input[type="radio"]:checked ~ span {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        
+        .radio-label input[type="radio"]:checked {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-color: var(--secondary);
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="number"]:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary);
+            border-color: var(--secondary);
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+            border-color: #95a5a6;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+            border-color: #7f8c8d;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .additional-links {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        
+        .additional-links a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .additional-links a:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        
+        .additional-links a i {
+            margin-right: 5px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: #7f8c8d;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            left: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .error-message {
+            background-color: #fdeded;
+            border-left: 5px solid var(--accent);
+            color: var(--accent);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-icon {
+            margin-right: 10px;
+            color: var(--secondary);
+        }
+        
+        .progress-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background-color: #e0e0e0;
+            position: absolute;
+            top: 25px;
+            left: 40px;
+            right: 40px;
+            z-index: 1;
+        }
+        
+        .progress-filled {
+            height: 100%;
+            background-color: var(--secondary);
+            width: 0;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-step {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #fff;
+            border: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #7f8c8d;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+        
+        .progress-step.active {
+            background-color: var(--secondary);
+            border-color: var(--secondary);
+            color: white;
+        }
+        
+        .progress-step.completed {
+            background-color: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        
+        .progress-label {
+            position: absolute;
+            top: 60px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #7f8c8d;
+            white-space: nowrap;
+            transform: translateX(-50%);
+            left: 50%;
+        }
+        
+        .active .progress-label {
+            color: var(--secondary);
+        }
+        
+        .completed .progress-label {
+            color: var(--success);
+        }
+        
+        /* Animation for section reveal */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animated {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        
+        /* Toggle Switch Styles */
+            .toggle-container {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin: 8px 0;
+            }
+
+            .toggle-switch {
+                position: relative;
+                display: inline-block;
+                width: 60px;
+                height: 34px;
+            }
+
+            .toggle-input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+                position: absolute;
+            }
+
+            .toggle-slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: #ccc;
+                transition: .4s;
+                border-radius: 34px;
+            }
+
+            .toggle-slider:before {
+                position: absolute;
+                content: "";
+                height: 26px;
+                width: 26px;
+                left: 4px;
+                bottom: 4px;
+                background-color: white;
+                transition: .4s;
+                border-radius: 50%;
+            }
+
+            .toggle-input:checked + .toggle-slider {
+                background-color: var(--secondary);
+            }
+
+            .toggle-input:focus + .toggle-slider {
+                box-shadow: 0 0 1px var(--secondary);
+            }
+
+            .toggle-input:checked + .toggle-slider:before {
+                transform: translateX(26px);
+            }
+
+            .toggle-label {
+                font-weight: 600;
+                color: #7f8c8d;
+                cursor: pointer;
+                user-select: none;
+                padding: 0 5px;
+            }
+
+            .toggle-label.no.active {
+                color: var(--accent);
+                font-weight: 700;
+            }
+
+            .toggle-label.yes.active {
+                color: var(--secondary);
+                font-weight: 700;
+            }
+                    
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <header class="header-section">
+            <div class="header-icon">
+                <i class="fas fa-lungs"></i>
+            </div>
+            <h1><i class="fas fa-heartbeat text-danger"></i> Lung Cancer Risk Assessment</h1>
+            <p>Complete the form below to calculate potential lung cancer risk factors</p>
+        </header>
+
+        <div class="progress-indicator">
+            <div class="progress-bar">
+                <div class="progress-filled" id="progress-bar"></div>
+            </div>
+            <div class="progress-step active" id="step-1">
+                1
+                <div class="progress-label">Demographics</div>
+            </div>
+            <div class="progress-step" id="step-2">
+                2
+                <div class="progress-label">Habits</div>
+            </div>
+            <div class="progress-step" id="step-3">
+                3
+                <div class="progress-label">Symptoms</div>
+            </div>
+            <div class="progress-step" id="step-4">
+                4
+                <div class="progress-label">Medical History</div>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="error-message">
+            <p><i class="fas fa-exclamation-circle"></i> {{ error }}</p>
+        </div>
+        {% endif %}
+
+        <form id="prediction-form" action="/predict" method="POST">
+            <div class="form-section animated delay-1" id="section-1">
+                <h2><i class="fas fa-user section-icon"></i> Patient Demographics</h2>
+                
+                <!-- Gender -->
+                <div class="form-group">
+                    <label for="GENDER">{{ feature_display_names.GENDER }}:</label>
+                    <div class="radio-group">
+                        {% for option in feature_options.GENDER %}
+                        <label class="radio-label">
+                            <input type="radio" name="GENDER" value="{{ option.value }}" {% if loop.first %}checked{% endif %}>
+                            <span class="radio-custom"></span>
+                            <span>{{ option.label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Age -->
+                <div class="form-group">
+                    <label for="AGE">{{ feature_display_names.AGE }}:</label>
+                    <div class="input-group">
+                        <input type="number" id="AGE" name="AGE" min="0" max="120" value="50" class="form-control" required>
+                        <span class="input-group-text"><i class="fas fa-birthday-cake"></i></span>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="form-section animated delay-2" id="section-2">
+                <h2><i class="fas fa-smoking section-icon"></i> Lifestyle & Habits</h2>
+                
+                <!-- Habits related questions -->
+                {% for feature in ['SMOKING', 'ALCOHOL CONSUMING'] %}
+                <div class="form-group">
+                    <label>{{ feature_display_names[feature] }}:</label>
+                    <div class="toggle-container">
+                        <span class="toggle-label no active">No</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" class="toggle-input">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label yes">Yes</span>
+                        <!-- Hidden actual inputs -->
+                        <input type="radio" name="{{ feature }}" value="1" checked>
+                        <input type="radio" name="{{ feature }}" value="2">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        
+            <div class="form-section animated delay-3" id="section-3">
+                <h2><i class="fas fa-stethoscope section-icon"></i> Physical Symptoms</h2>
+                
+                <!-- Physical symptoms -->
+                <div class="row">
+                {% for feature in ['YELLOW_FINGERS', 'FATIGUE', 'WHEEZING', 'COUGHING', 'SHORTNESS OF BREATH', 'SWALLOWING DIFFICULTY', 'CHEST PAIN'] %}
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>{{ feature_display_names[feature] }}:</label>
+                            <div class="toggle-container">
+                                <span class="toggle-label no active">No</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" class="toggle-input">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label yes">Yes</span>
+                                <!-- Hidden actual inputs -->
+                                <input type="radio" name="{{ feature }}" value="1" checked>
+                                <input type="radio" name="{{ feature }}" value="2">
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
+        
+            <div class="form-section animated delay-4" id="section-4">
+                <h2><i class="fas fa-notes-medical section-icon"></i> Medical History</h2>
+                
+                <!-- Medical history -->
+                <div class="row">
+                {% for feature in ['ANXIETY', 'PEER_PRESSURE', 'CHRONIC DISEASE', 'ALLERGY'] %}
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>{{ feature_display_names[feature] }}:</label>
+                            <div class="toggle-container">
+                                <span class="toggle-label no active">No</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" class="toggle-input">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label yes">Yes</span>
+                                <!-- Hidden actual inputs -->
+                                <input type="radio" name="{{ feature }}" value="1" checked>
+                                <input type="radio" name="{{ feature }}" value="2">
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
+        
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-calculator"></i> Calculate Risk
+                </button>
+                <button type="reset" class="btn btn-secondary">
+                    <i class="fas fa-redo"></i> Reset Form
+                </button>
+            </div>
+        </form>
+        <div class="additional-links">
+            <a href="/history"><i class="fas fa-history"></i> View Previous Assessments</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Lung Cancer Risk Assessment Tool | <i class="fas fa-shield-alt"></i> Health Data Protected</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize animations and progress tracking
+        document.addEventListener('DOMContentLoaded', function() {
+            // Progress tracking elements
+            const sections = document.querySelectorAll('.form-section');
+            const progressSteps = document.querySelectorAll('.progress-step');
+            const progressBar = document.getElementById('progress-bar');
+            const form = document.getElementById('prediction-form');
+        
+            // Update progress bar and steps
+            function updateProgress(currentSection) {
+                const progress = (currentSection / sections.length) * 100;
+                progressBar.style.width = progress + '%';
+        
+                progressSteps.forEach((step, index) => {
+                    step.classList.toggle('completed', index < currentSection);
+                    step.classList.toggle('active', index === currentSection);
+                });
+            }
+        
+            // Section navigation
+            progressSteps.forEach((step, index) => {
+                step.addEventListener('click', () => {
+                    sections.forEach((section, sectionIndex) => {
+                        section.style.display = sectionIndex === index ? 'block' : 'none';
+                    });
+                    updateProgress(index);
+                });
+            });
+        
+            // Initialize - show first section only
+            sections.forEach((section, index) => {
+                if (index > 0) section.style.display = 'none';
+            });
+        
+            // Add navigation buttons
+            sections.forEach((section, index) => {
+                // Next button
+                if (index < sections.length - 1) {
+                    const nextBtn = document.createElement('button');
+                    nextBtn.type = 'button';
+                    nextBtn.className = 'btn btn-primary mt-3 float-end';
+                    nextBtn.innerHTML = 'Next <i class="fas fa-arrow-right"></i>';
+                    nextBtn.addEventListener('click', () => {
+                        if (validateSection(section)) {
+                            section.style.display = 'none';
+                            sections[index + 1].style.display = 'block';
+                            updateProgress(index + 1);
+                        }
+                    });
+                    section.appendChild(nextBtn);
+                }
+        
+                // Previous button
+                if (index > 0) {
+                    const prevBtn = document.createElement('button');
+                    prevBtn.type = 'button';
+                    prevBtn.className = 'btn btn-outline-secondary mt-3';
+                    prevBtn.innerHTML = '<i class="fas fa-arrow-left"></i> Previous';
+                    prevBtn.addEventListener('click', () => {
+                        section.style.display = 'none';
+                        sections[index - 1].style.display = 'block';
+                        updateProgress(index - 1);
+                    });
+                    section.appendChild(prevBtn);
+                }
+            });
+        
+            // Replace your existing toggle switch handler with this:
+            document.querySelectorAll('.toggle-container').forEach(container => {
+                const checkbox = container.querySelector('.toggle-input');
+                const noRadio = container.querySelector('input[value="1"]');
+                const yesRadio = container.querySelector('input[value="2"]');
+                const noLabel = container.querySelector('.toggle-label.no');
+                const yesLabel = container.querySelector('.toggle-label.yes');
+            
+                // Initialize
+                updateToggleState();
+            
+                // Handle checkbox changes
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        yesRadio.checked = true;
+                    } else {
+                        noRadio.checked = true;
+                    }
+                    updateToggleState();
+                });
+            
+                // Handle label clicks
+                noLabel.addEventListener('click', () => {
+                    checkbox.checked = false;
+                    noRadio.checked = true;
+                    updateToggleState();
+                });
+            
+                yesLabel.addEventListener('click', () => {
+                    checkbox.checked = true;
+                    yesRadio.checked = true;
+                    updateToggleState();
+                });
+            
+                function updateToggleState() {
+                    const isYes = yesRadio.checked;
+                    checkbox.checked = isYes;
+                    noLabel.classList.toggle('active', !isYes);
+                    yesLabel.classList.toggle('active', isYes);
+                }
+            });
+        
+          
+            // Section hover effects
+            sections.forEach(section => {
+                section.addEventListener('mouseenter', () => {
+                    section.style.borderLeftColor = '#e74c3c';
+                });
+                section.addEventListener('mouseleave', () => {
+                    section.style.borderLeftColor = 'var(--secondary)';
+                });
+            });
+        
+            // Form section validation
+            function validateSection(section) {
+                const inputs = section.querySelectorAll('input[required]');
+                let isValid = true;
+        
+                inputs.forEach(input => {
+                    if (!input.value) {
+                        input.classList.add('error');
+                        isValid = false;
+                    } else {
+                        input.classList.remove('error');
+                    }
+                });
+        
+                if (!isValid) {
+                    alert('Please fill all required fields before proceeding');
+                }
+        
+                return isValid;
+            }
+        });
+    </script>
+</body>
+</html>
