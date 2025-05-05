@@ -8,3 +8,4 @@ joblib
 python-dotenv
 imbalanced-learn
 flask_cors
+gunicorn
