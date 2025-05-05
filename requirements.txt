@@ -1,0 +1,10 @@
+Flask
+Werkzeug
+pymongo
+pandas
+numpy
+scikit-learn
+joblib
+python-dotenv
+imbalanced-learn
+flask_cors
